@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
         floatingActionButton = findViewById(R.id.floatingActionButton);
         searchView = findViewById(R.id.searchView);
         scrollView = findViewById(R.id.scrollview);
-        
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
