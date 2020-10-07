@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.sevenmoor.penstriman">
+
+    <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED"
+        tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
@@ -24,7 +27,8 @@
             android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
+                <action android:name="android.bluetooth.device.action.PAIRING_REQUEST" />
+                <action android:name="android.bluetooth.device.action.PAIRING_CANCEL" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -33,13 +37,29 @@
             android:name=".PlayVideo"
             android:configChanges="orientation|screenSize"
             android:alwaysRetainTaskState="true"
-            android:launchMode="singleInstance"/>
+            android:launchMode="singleInstance">
+            <intent-filter>
+                <action android:name="android.bluetooth.device.action.PAIRING_REQUEST" />
+                <action android:name="android.bluetooth.device.action.PAIRING_CANCEL" />
+            </intent-filter>
+
+        </activity>
         <activity android:name=".DiscoverActivity"
             android:configChanges="orientation|screenSize"
-            android:alwaysRetainTaskState="true"/>
+            android:alwaysRetainTaskState="true">
+            <intent-filter>
+                <action android:name="android.bluetooth.device.action.PAIRING_REQUEST" />
+                <action android:name="android.bluetooth.device.action.PAIRING_CANCEL" />
+            </intent-filter>
+        </activity>
         <activity android:name=".StreamActivity"
             android:configChanges="orientation|screenSize"
-            android:alwaysRetainTaskState="true"/>
+            android:alwaysRetainTaskState="true">
+            <intent-filter>
+                <action android:name="android.bluetooth.device.action.PAIRING_REQUEST" />
+                <action android:name="android.bluetooth.device.action.PAIRING_CANCEL" />
+            </intent-filter>
+        </activity>
     </application>
 
 
