@@ -1,11 +1,13 @@
 package com.sevenmoor.penstriman;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -73,9 +75,19 @@ public class DiscoverActivity extends AppCompatActivity {
     BroadcastReceiver discoveryResult = new BroadcastReceiver(){
         @Override
         public void onReceive(Context context, Intent intent){
-            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             TextView view = new TextView(scrollView.getContext());
             view.setText(device.getName());
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view){
+                    Intent intent = new Intent(getApplicationContext(),StreamActivity.class);
+                    intent.putExtra("uuid",device.getAddress());
+                    startActivity(intent);
+                }
+            });
+
             scrollView.addView(view);
         }
     };
@@ -96,15 +108,20 @@ public class DiscoverActivity extends AppCompatActivity {
             String actionStateChanged = BluetoothAdapter.ACTION_STATE_CHANGED;
             String actionRequestEnable = BluetoothAdapter.ACTION_REQUEST_ENABLE;
             registerReceiver(adapterState, new IntentFilter(actionStateChanged));
+            if(checkSelfPermission(Manifest.permission.BLUETOOTH)!=PackageManager.PERMISSION_GRANTED){
+                requestPermissions(new String[]{Manifest.permission.BLUETOOTH,Manifest.permission.BLUETOOTH_ADMIN},0);
+            }
             startActivityForResult(new Intent(actionRequestEnable), 0);
         }
 
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                boolean result = adapter.startDiscovery();
-                Log.i("Info", "adapter state int="+adapter.getState());
-                Log.i("Info", "Discovering="+result);
+                if(!adapter.isDiscovering()) {
+                    boolean result = adapter.startDiscovery();
+                    Log.i("Info", "adapter state int="+adapter.getState());
+                    Log.i("Info", "Discovering="+result);
+                }
             }
         });
 
