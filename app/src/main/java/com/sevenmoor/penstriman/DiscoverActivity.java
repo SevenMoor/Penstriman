@@ -11,19 +11,30 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 public class DiscoverActivity extends AppCompatActivity {
 
-    ScrollView scrollView;
+    ListView scrollView;
     BluetoothAdapter adapter;
     FloatingActionButton refresh;
+
+    private ArrayList<String> bluetoothList;
+    private ArrayAdapter<String> arrayAdapter;
+    private HashMap<String,String> addressBook;
 
 
     BroadcastReceiver discoveryMonitor = new BroadcastReceiver() {
@@ -76,19 +87,13 @@ public class DiscoverActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent){
             final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-            TextView view = new TextView(scrollView.getContext());
-            view.setText(device.getName());
-
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view){
-                    Intent intent = new Intent(getApplicationContext(),StreamActivity.class);
-                    intent.putExtra("uuid",device.getAddress());
-                    startActivity(intent);
-                }
-            });
-
-            scrollView.addView(view);
+            String deviceName = device.getName();
+            String deviceAddr = device.getAddress();
+            if(deviceName != null) {
+                bluetoothList.add(deviceName);
+                addressBook.put(deviceName,deviceAddr);
+                arrayAdapter.notifyDataSetChanged();
+            }
         }
     };
 
@@ -97,9 +102,14 @@ public class DiscoverActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.discover);
 
-        scrollView = findViewById(R.id.scrollView);
+        scrollView = findViewById(R.id.bluetooth);
         adapter = BluetoothAdapter.getDefaultAdapter();
         refresh = findViewById(R.id.refreshButton);
+
+        bluetoothList = new ArrayList<>();
+        arrayAdapter = new ArrayAdapter<>(this,android.R.layout.simple_spinner_item, bluetoothList);
+        scrollView.setAdapter(arrayAdapter);
+        addressBook = new HashMap<String,String>();
 
         String enableRequest = BluetoothAdapter.ACTION_REQUEST_ENABLE;
         startActivityForResult(new Intent(enableRequest), 0);
@@ -118,9 +128,12 @@ public class DiscoverActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if(!adapter.isDiscovering()) {
-                    boolean result = adapter.startDiscovery();
-                    Log.i("Info", "adapter state int="+adapter.getState());
-                    Log.i("Info", "Discovering="+result);
+                    ActivityCompat.requestPermissions(DiscoverActivity.this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},2);
+                    if (adapter!=null){
+                        boolean result = adapter.startDiscovery();
+                        Log.i("Info", "adapter state int="+adapter.getState());
+                        Log.i("Info", "Discovering="+result);
+                    }
                 }
             }
         });
@@ -130,5 +143,14 @@ public class DiscoverActivity extends AppCompatActivity {
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         registerReceiver(discoveryMonitor,filter);
         registerReceiver(discoveryResult, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+
+        scrollView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id){
+                final String selected = addressBook.get(((TextView) view).getText().toString());
+                Intent intent = new Intent(getApplicationContext(),StreamActivity.class);
+                intent.putExtra("uuid",selected);
+                startActivity(intent);
+            }
+        });
     }
 }
