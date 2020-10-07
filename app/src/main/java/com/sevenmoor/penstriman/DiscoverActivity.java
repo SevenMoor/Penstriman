@@ -97,7 +97,7 @@ public class DiscoverActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.discover);
 
-        scrollView = findViewById(R.id.scrollview);
+        scrollView = findViewById(R.id.scrollView);
         adapter = BluetoothAdapter.getDefaultAdapter();
         refresh = findViewById(R.id.refreshButton);
 
