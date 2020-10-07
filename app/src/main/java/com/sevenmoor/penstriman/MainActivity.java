@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
@@ -19,7 +18,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -37,13 +35,13 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
-    String VIDEO_NAME_TAG = "VIDEO_NAME";
+    private String VIDEO_NAME_TAG = "VIDEO_NAME";
+
     private ListView listView;
     private ArrayList<String> videoList;
     private ArrayAdapter<String> adapter;
     private SaveRestore saveRestore;
     private BluetoothAdapter bluetoothAdapter;
-    private SharedPreferences sharedPreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,13 +72,6 @@ public class MainActivity extends AppCompatActivity {
         if(savedInstanceState!=null){
             videoList = savedInstanceState.getStringArrayList(VIDEO_NAME_TAG);
         }
-        sharedPreferences = getSharedPreferences(VIDEO_NAME_TAG,MODE_PRIVATE);
-        saveRestore = new SaveRestore(videoList, sharedPreferences);
-
-        IntentFilter filter = new IntentFilter(
-                "android.bluetooth.device.action.PAIRING_REQUEST");
-        registerReceiver(mReceiver, filter);
-
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -104,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
                             discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 5000);
                             startActivity(discoverableIntent);
                         }
-                        Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                        Intent intent = new Intent(MainActivity.this, SendStream.class);
                         intent.putExtra(VIDEO_NAME_TAG, selected);
                         startActivity(intent);
                     }
@@ -238,28 +229,6 @@ public class MainActivity extends AppCompatActivity {
         return(msg);
     }
 
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (Objects.equals(intent.getAction(), "android.bluetooth.device.action.PAIRING_REQUEST")) {
-                try {
-                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    int pin=intent.getIntExtra("android.bluetooth.device.extra.PAIRING_KEY", 0);
-                    Log.d("PIN", " " + intent.getIntExtra("android.bluetooth.device.extra.PAIRING_KEY",0));
-                    Log.d("Bonded", device.getName());
-                    Toast.makeText(MainActivity.this, "Bonded "+device.getName(), Toast.LENGTH_LONG).show();
-
-                    byte[] pinBytes;
-                    pinBytes = (""+pin).getBytes(StandardCharsets.UTF_8);
-                    device.setPin(pinBytes);
-                    device.setPairingConfirmation(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -270,4 +239,5 @@ public class MainActivity extends AppCompatActivity {
             adapter.notifyDataSetChanged();
         }
     }
+
 }
