@@ -107,10 +107,9 @@ public class DiscoverActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_item, bluetoothList);
         listView.setAdapter(arrayAdapter);
 
+
         String enableRequest = BluetoothAdapter.ACTION_REQUEST_ENABLE;
         startActivityForResult(new Intent(enableRequest), 0);
-
-
 
         if (!adapter.isEnabled()) {
             String actionStateChanged = BluetoothAdapter.ACTION_STATE_CHANGED;
