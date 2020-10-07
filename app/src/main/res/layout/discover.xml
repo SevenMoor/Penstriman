@@ -5,13 +5,19 @@
 
     <ListView
         android:id="@+id/bluetooth"
+        style="@style/Widget.AppCompat.ListView"
         android:layout_width="match_parent"
-        android:layout_height="611dp"></ListView>
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"></ListView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/refreshButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/bluetooth"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="30dp"
         android:clickable="true"
+        android:textAlignment="center"
         app:srcCompat="@android:drawable/stat_notify_sync" />
 </RelativeLayout>

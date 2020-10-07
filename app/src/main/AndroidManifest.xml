@@ -37,6 +37,9 @@
         <activity android:name=".DiscoverActivity"
             android:configChanges="orientation|screenSize"
             android:alwaysRetainTaskState="true"/>
+        <activity android:name=".StreamActivity"
+            android:configChanges="orientation|screenSize"
+            android:alwaysRetainTaskState="true"/>
     </application>
 
 

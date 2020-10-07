@@ -45,6 +45,9 @@ public class DiscoverActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             if (dStarted.equals(intent.getAction())) {
                 Toast.makeText(getApplicationContext(), "Discovery Started. . .", Toast.LENGTH_SHORT).show();
+                bluetoothList.clear();
+                addressBook.clear();
+                arrayAdapter.notifyDataSetChanged();
             } else if (dFinished.equals(intent.getAction())) {
                 Toast.makeText(getApplicationContext(), "Discovery Completed. . .", Toast.LENGTH_SHORT).show();
             }
@@ -90,9 +93,11 @@ public class DiscoverActivity extends AppCompatActivity {
             String deviceName = device.getName();
             String deviceAddr = device.getAddress();
             if(deviceName != null) {
-                bluetoothList.add(deviceName);
-                addressBook.put(deviceName,deviceAddr);
-                arrayAdapter.notifyDataSetChanged();
+                if(!bluetoothList.contains(deviceName)) {
+                    bluetoothList.add(deviceName);
+                    addressBook.put(deviceName,deviceAddr);
+                    arrayAdapter.notifyDataSetChanged();
+                }
             }
         }
     };
@@ -127,13 +132,14 @@ public class DiscoverActivity extends AppCompatActivity {
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!adapter.isDiscovering()) {
-                    ActivityCompat.requestPermissions(DiscoverActivity.this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},2);
-                    if (adapter!=null){
-                        boolean result = adapter.startDiscovery();
-                        Log.i("Info", "adapter state int="+adapter.getState());
-                        Log.i("Info", "Discovering="+result);
-                    }
+                if(adapter.isDiscovering()) {
+                    adapter.cancelDiscovery();
+                }
+                ActivityCompat.requestPermissions(DiscoverActivity.this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},2);
+                if (adapter!=null){
+                    boolean result = adapter.startDiscovery();
+                    Log.i("Info", "adapter state int="+adapter.getState());
+                    Log.i("Info", "Discovering="+result);
                 }
             }
         });
@@ -152,5 +158,15 @@ public class DiscoverActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        if(adapter.isDiscovering()) {
+            adapter.cancelDiscovery();
+        }
+        ActivityCompat.requestPermissions(DiscoverActivity.this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},2);
+        if (adapter!=null){
+            boolean result = adapter.startDiscovery();
+            Log.i("Info", "adapter state int="+adapter.getState());
+            Log.i("Info", "Discovering="+result);
+        }
     }
 }
