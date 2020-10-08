@@ -91,11 +91,11 @@ public class DiscoverActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent){
             final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             String deviceName = device.getName();
-            String deviceAddr = device.getAddress();
+            String deviceAddress = device.getAddress();
             if(deviceName != null) {
                 if(!bluetoothList.contains(deviceName)) {
                     bluetoothList.add(deviceName);
-                    addressBook.put(deviceName,deviceAddr);
+                    addressBook.put(deviceName,deviceAddress);
                     arrayAdapter.notifyDataSetChanged();
                 }
             }
