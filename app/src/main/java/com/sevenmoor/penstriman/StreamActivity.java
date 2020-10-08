@@ -69,7 +69,6 @@ public class StreamActivity extends AppCompatActivity {
                 boolean res = file.createNewFile();
             }
             fileOutputStream = new FileOutputStream(file,true);
-            //writer = new OutputStreamWriter(fileOutputStream);
         }
         catch (IOException e){
             e.printStackTrace();
@@ -84,7 +83,7 @@ public class StreamActivity extends AppCompatActivity {
                   String str = new String(text);
                   if(!str.equals("EOF")){
                       try {
-                          Log.i(TAG, "bytes: "+Arrays.toString(text));
+                          //Log.i(TAG, "bytes: "+Arrays.toString(text));
                           fileOutputStream.write(text);
                       }
                       catch (IOException e){
@@ -95,7 +94,6 @@ public class StreamActivity extends AppCompatActivity {
                       try {
                           Uri vidUri = Uri.fromFile(new File(file.getPath()));
                           video.setVideoURI(vidUri);
-                          //writer.close();
                           fileOutputStream.close();
                           prog.setVisibility(View.INVISIBLE);
                           video.start();
@@ -150,7 +148,7 @@ public class StreamActivity extends AppCompatActivity {
                 try{
                     numBytes = input.read(buffer);
                     if(numBytes>0){
-                        Log.i(TAG, "Caught bytes");
+                        //Log.i(TAG, "Caught bytes");
                         Message readMsg = handler.obtainMessage(StreamActivity.MessageConstants.MESSAGE_READ, numBytes, -1, Arrays.copyOf(buffer,numBytes));
                         readMsg.sendToTarget();
                         size += numBytes;
