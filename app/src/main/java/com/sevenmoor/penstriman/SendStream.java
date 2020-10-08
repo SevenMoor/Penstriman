@@ -8,29 +8,38 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.provider.SyncStateContract;
+import android.os.Environment;
 import android.util.Log;
-import android.widget.ProgressBar;
 import android.widget.Toast;
-import android.widget.VideoView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
-public class SendStream extends AppCompatActivity {
+import static android.os.Environment.DIRECTORY_DOWNLOADS;
 
-    ProgressBar progressBar;
-    private final static int REQUEST_ENABLE_BT = 1;
+public class SendStream extends AppCompatActivity {
     private final static String CLASSNAME = "BOOOM";
     private UUID MY_UUID = UUID.fromString("542a3b22-d3f9-476c-ad5b-49bc19f24b1a");
 
+    private String videoPath;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sendstream);
-        progressBar = findViewById(R.id.progressBar);
+
+        Intent intent = getIntent();
+        String VIDEO_NAME_TAG = "VIDEO_NAME";
+        String videoName = intent.getStringExtra(VIDEO_NAME_TAG);
+
+        videoPath = Environment.getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS) + "/"+ videoName;
 
         IntentFilter receiverIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         registerReceiver(mReceiver, receiverIntent);
@@ -46,7 +55,6 @@ public class SendStream extends AppCompatActivity {
             Log.i(CLASSNAME,"Bluetooth enabled");
         } else if (!bluetoothAdapter.isEnabled()) {
 
-            Intent btIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             Log.i(CLASSNAME,"Bluetooth disabled");
 
         }
@@ -59,6 +67,7 @@ public class SendStream extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
 
+            assert action != null;
             if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
                 final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
                 switch(state) {
@@ -85,6 +94,7 @@ public class SendStream extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
 
+            assert action != null;
             if(action.equals(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED)) {
 
                 int mode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.ERROR);
@@ -114,8 +124,11 @@ public class SendStream extends AppCompatActivity {
 
     private class AcceptThread extends Thread {
         private final BluetoothServerSocket bluetoothServerSocket;
+        private OutputStream mmOutStream;
 
         public AcceptThread() {
+            OutputStream tmpOut = null;
+
             BluetoothServerSocket temporary = null;
             try {
                 String APP_NAME = "PENSTRIMAN";
@@ -124,6 +137,7 @@ public class SendStream extends AppCompatActivity {
                 Log.e(CLASSNAME, "Socket's listen() failed", e);
             }
             bluetoothServerSocket = temporary;
+            mmOutStream = tmpOut;
         }
 
         public void run() {
@@ -131,16 +145,15 @@ public class SendStream extends AppCompatActivity {
             while (true) {
                 Log.i(CLASSNAME, "Thread running");
                 try {
-                    bluetoothSocket = bluetoothServerSocket.accept();
                     Log.i(CLASSNAME, "Accept Connection");
-                    //Log.i(CLASSNAME, "ThreadAccept run() - accept");
+                    bluetoothSocket = bluetoothServerSocket.accept();
                 } catch (IOException e) {
                     Log.e(CLASSNAME, "Socket's accept() failed", e);
                     break;
                 }
-
                 if (bluetoothSocket != null) {
                     Log.i(CLASSNAME, "Connection accepted (Run())");
+                    manageConnection(bluetoothSocket);
                     try {
                         bluetoothServerSocket.close();
                     } catch (IOException e) {
@@ -151,6 +164,41 @@ public class SendStream extends AppCompatActivity {
             }
         }
 
+        public void manageConnection(BluetoothSocket bluetoothSocket){
+            int finalSize = 0;
+            Log.i(CLASSNAME, "Client connected");
+            try {
+                mmOutStream = bluetoothSocket.getOutputStream();
+            } catch (IOException e) {
+                Log.i(CLASSNAME, e.getMessage());
+            }
+            File file = new File(videoPath);
+            Log.i(CLASSNAME, "length "+file.length());
+            int size = (int) file.length();
+            byte[] bytes = new byte[size];
+            try {
+                BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
+                buf.read(bytes, 0, bytes.length);
+                Log.i(CLASSNAME, new String(bytes));
+                buf.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                mmOutStream.write(bytes);
+                try {
+                    sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                finalSize = bytes.length;
+                Log.i(CLASSNAME, String.valueOf(finalSize));
+                Log.i(CLASSNAME, new String(bytes));
+                mmOutStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         public void cancel() {
             try {
                 bluetoothServerSocket.close();
@@ -159,5 +207,4 @@ public class SendStream extends AppCompatActivity {
             }
         }
     }
-
 }
