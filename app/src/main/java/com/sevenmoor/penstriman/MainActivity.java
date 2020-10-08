@@ -183,11 +183,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onDestroy(){
-        super.onDestroy();
-        /*unregisterReceiver(onComplete);
-        unregisterReceiver(onNotificationClick);*/
-
+        unregisterReceiver(onComplete);
+        unregisterReceiver(onNotificationClick);
         saveRestore.save();
+        super.onDestroy();
     }
 
     BroadcastReceiver onComplete=new BroadcastReceiver() {
