@@ -25,6 +25,7 @@ import java.util.HashMap;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 public class DiscoverActivity extends AppCompatActivity {
 
@@ -162,7 +163,8 @@ public class DiscoverActivity extends AppCompatActivity {
         if(adapter.isDiscovering()) {
             adapter.cancelDiscovery();
         }
-        ActivityCompat.requestPermissions(DiscoverActivity.this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},2);
+        if (ContextCompat.checkSelfPermission(DiscoverActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            ActivityCompat.requestPermissions(DiscoverActivity.this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},2);
         if (adapter!=null){
             boolean result = adapter.startDiscovery();
             Log.i("Info", "adapter state int="+adapter.getState());

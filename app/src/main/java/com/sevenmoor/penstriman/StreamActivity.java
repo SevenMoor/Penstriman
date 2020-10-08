@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -29,6 +30,7 @@ import java.util.UUID;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
 
@@ -59,8 +61,8 @@ public class StreamActivity extends AppCompatActivity {
         prog = findViewById(R.id.progressStream);
 
         seekTime = 0;
-
-        ActivityCompat.requestPermissions(StreamActivity.this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},2);
+        if(ContextCompat.checkSelfPermission(StreamActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+            ActivityCompat.requestPermissions(StreamActivity.this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},2);
         File outputDir = StreamActivity.this.getCacheDir();
         file = null;
         try {
