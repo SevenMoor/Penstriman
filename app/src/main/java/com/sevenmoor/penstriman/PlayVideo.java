@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
 import android.widget.MediaController;
+import android.widget.ProgressBar;
 import android.widget.VideoView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +21,7 @@ public class PlayVideo extends AppCompatActivity {
 
     String VIDEO_NAME_TAG = "VIDEO_NAME";
     private VideoView vidView;
+    private ProgressBar bar;
     private int seekTime = 0;
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +34,7 @@ public class PlayVideo extends AppCompatActivity {
 
         // Get a reference to the VideoView instance as follows, using the id we set in the XML layout.
         vidView = (VideoView)findViewById(R.id.videoView);
+        bar = findViewById(R.id.progressStream);
 
         // Add playback controls.
         MediaController vidControl = new MediaController(this);
@@ -45,6 +48,7 @@ public class PlayVideo extends AppCompatActivity {
         // Parse the address string as a URI so that we can pass it to the VideoView object.
         vidView.setVideoURI(vidUri);
 
+        bar.setVisibility(View.INVISIBLE);
         // Start playback.
         vidView.start();
     }

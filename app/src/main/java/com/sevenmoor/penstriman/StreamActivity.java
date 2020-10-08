@@ -12,7 +12,9 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.View;
 import android.widget.MediaController;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.widget.VideoView;
 
@@ -32,9 +34,14 @@ import static android.os.Environment.DIRECTORY_DOWNLOADS;
 
 public class StreamActivity extends AppCompatActivity {
 
+    int seekTime;
+
     private FileOutputStream fileOutputStream;
+
+
     private VideoView video;
-    //private OutputStreamWriter writer;
+    private ProgressBar prog;
+
     private File file;
     private static final String TAG = "PES";
     private Handler handler;
@@ -47,7 +54,11 @@ public class StreamActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.videoplayer);
+
         video = findViewById(R.id.videoView);
+        prog = findViewById(R.id.progressStream);
+
+        seekTime = 0;
 
         ActivityCompat.requestPermissions(StreamActivity.this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},2);
         File outputDir = StreamActivity.this.getCacheDir();
@@ -86,6 +97,7 @@ public class StreamActivity extends AppCompatActivity {
                           video.setVideoURI(vidUri);
                           //writer.close();
                           fileOutputStream.close();
+                          prog.setVisibility(View.INVISIBLE);
                           video.start();
                       }
                       catch (IOException e){
@@ -219,5 +231,19 @@ public class StreamActivity extends AppCompatActivity {
         public BluetoothSocket getSock(){
             return sock;
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        video.start();
+        video.seekTo(seekTime);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        seekTime = video.getCurrentPosition();
+        video.pause();
     }
 }
