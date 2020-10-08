@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
         }
-        Toast.makeText(this, statusMessage(cursor), Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, statusMessage(cursor), Toast.LENGTH_LONG).show();
         manager.enqueue(request);
         videoList.add(videoName);
     }
@@ -205,6 +205,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private String statusMessage(Cursor c) {
+
         String msg="";
         switch(c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))) {
             case DownloadManager.STATUS_FAILED:

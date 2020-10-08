@@ -10,12 +10,14 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -28,7 +30,6 @@ public class SendStream extends AppCompatActivity {
     private UUID MY_UUID = UUID.fromString("542a3b22-d3f9-476c-ad5b-49bc19f24b1a");
 
     private String videoPath;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -164,6 +165,7 @@ public class SendStream extends AppCompatActivity {
         }
 
         public void manageConnection(BluetoothSocket bluetoothSocket){
+            int finalSize = 0;
             Log.i(CLASSNAME, "Client connected");
             try {
                 mmOutStream = bluetoothSocket.getOutputStream();
@@ -171,11 +173,13 @@ public class SendStream extends AppCompatActivity {
                 Log.i(CLASSNAME, e.getMessage());
             }
             File file = new File(videoPath);
+            Log.i(CLASSNAME, "length "+file.length());
             int size = (int) file.length();
             byte[] bytes = new byte[size];
             try {
                 BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
                 buf.read(bytes, 0, bytes.length);
+                Log.i(CLASSNAME, new String(bytes));
                 buf.close();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -187,7 +191,9 @@ public class SendStream extends AppCompatActivity {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                mmOutStream.write("EOF".getBytes(StandardCharsets.UTF_8));
+                finalSize = bytes.length;
+                Log.i(CLASSNAME, String.valueOf(finalSize));
+                Log.i(CLASSNAME, new String(bytes));
                 mmOutStream.close();
             } catch (IOException e) {
                 e.printStackTrace();
