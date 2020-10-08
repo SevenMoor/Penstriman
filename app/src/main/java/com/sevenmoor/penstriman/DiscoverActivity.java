@@ -169,4 +169,12 @@ public class DiscoverActivity extends AppCompatActivity {
             Log.i("Info", "Discovering="+result);
         }
     }
+
+    @Override
+    public void onDestroy(){
+        unregisterReceiver(discoveryMonitor);
+        unregisterReceiver(adapterState);
+        unregisterReceiver(discoveryResult);
+        super.onDestroy();
+    }
 }
